@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/usermodel.js";
+import transporter from "../config/nodemailer.js";
 
 export const register = async (req, res)=>{
   const {name, email, password}=req.body;
@@ -24,9 +25,20 @@ export const register = async (req, res)=>{
           secure:process.env.NODE_ENV==="production",
           sameSite: process.env.NODE_ENV==="production"? "none" : "strict",
           maxAge: 7 * 24 * 60 * 60 * 1000
-       })
+       });
+
+       const mailOptions= {
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: "Welcome To CodeCode",
+        text:`Welcome to CodeCode Website. Your account has been created with email id:${email}`
+       }
+       const abc=await transporter.sendMail(mailOptions);
+       console.log(abc)
+
         return res.json({success:true});
   }catch(error){
+    console.error(error);
     res.json({success:false, message: error.message})
   }
 }
